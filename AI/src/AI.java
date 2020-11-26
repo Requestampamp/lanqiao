@@ -1,10 +1,10 @@
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 import java.io.*;
+import java.util.*;
 
 public class AI extends MIDlet
 {
-	
 	Display display;
 	MainCanvas mc;
 	public AI(){
@@ -19,50 +19,113 @@ public class AI extends MIDlet
 	public void pauseApp(){
 	}
 }
-class MainCanvas extends Canvas
+class MainCanvas extends Canvas implements Runnable
 {
-	int x=120,y=100;
-	Image dowImg,leftImg,rightImg,upImg,currentImg;
+	Random r;
+	int x,y,i,bx,by,count;
+	Thread t;
+	Image img,boss;
+	Image m[][]=new Image[4][3];
 	public MainCanvas(){
-	try{
-		dowImg=Image.createImage("/sayo10.png");
-		leftImg=Image.createImage("/sayo12.png");
-		rightImg=Image.createImage("/sayo16.png");
-		upImg=Image.createImage("/sayo14.png");
-		currentImg=dowImg;
+		try{
+			 r=new Random();
+			x=100;
+			y=120;
+			i=1;
+			bx=0;
+			by=0;
+			for(int a=0;a<4;a++){
+			   for(int b=0;b<3;b++){
+			   m[a][b]=Image.createImage("/sayo"+a+b+".png");
+
+			   }
+			}
+			img=m[0][1];
+			boss=Image.createImage("/boss.png");
+
+			t=new Thread(this);
+	
+			t.start();
+			
 		}
-		catch (IOException e)
-		{
+		catch(IOException e){
 			e.printStackTrace();
 		}
 	}
+
+
+	public void run(){
+		  while(true){
+			  try{
+			   t.sleep(100);
+			  }catch(InterruptedException e){};
+			
+			 
+			  if(r.nextInt(3)==0){
+			  if(bx>x){
+		
+		  
+			   bx--;
+			  }else if(bx<x){
+		  
+			   bx++;
+			  }
+
+			  if(by>y){
+		 
+			   by--;
+			  }else if(by<y){
+				//try{
+			   //t.sleep(1000);
+			  //}catch(InterruptedException e){};
+		
+		   
+			  by++;
+			    };
+			  }
+			
+		  repaint();
+		  }  
+	}
+
+
+
+
+	
+	public void move(int c){
+	 if(i==1){
+	  img=m[c][0];
+	  i++;
+	 }else if(i==2){
+	   img=m[c][2];
+	   i--;
+	 }
+	}
 	public void paint(Graphics g){
-		g.setColor(0,0,0);
+		g.setColor(250,200,180);
 		g.fillRect(0,0,getWidth(),getHeight());
-		g.drawImage(currentImg,x,y,0);
+		g.drawImage(img,x,y,0);
+		g.drawImage(boss,bx,by,0);
 	}
 	public void keyPressed(int keyCode){
-	int action=getGameAction(keyCode);
-	if(action==LEFT){
-		currentImg=leftImg;
-		System.out.println("向左转");
-		this.x=this.x-5;
+		int action=getGameAction(keyCode);
+		if(action==LEFT){
+			move(0);
+		x-=3;
+		}
+		if(action==UP){
+			move(1);
+		y-=3;
+		}
+		if(action==RIGHT){
+			move(2);
+		x+=3;
+		}
+		if(action==DOWN){
+			move(3);
+		y+=3;
+		}
+		repaint();
 	}
-	if(action==RIGHT){
-		currentImg=rightImg;
-		System.out.println("向右转");
-		this.x=this.x+5;
-	}
-	if(action==UP){
-		currentImg=upImg;
-		System.out.println("向上转");
-		this.y=this.y-5;
-	}
-	if(action==DOWN){
-		currentImg=dowImg;
-		System.out.println("向下转");
-		this.y=this.y+5;
-	}
-	repaint();
-	}
+
 }
